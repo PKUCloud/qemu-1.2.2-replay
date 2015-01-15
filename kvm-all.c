@@ -1654,6 +1654,48 @@ int kvm_vcpu_ioctl(CPUArchState *env, int type, ...)
     return ret;
 }
 
+// XELATEX
+#define PAGE_SHIFT 12
+
+int kvm_commit_dma_access(struct DMA_AC *DMA_access)
+{
+	//printf("%s, size=%d\n", __func__, DMA_access->size);
+	kvm_vm_ioctl(kvm_state, KVM_DMA_COMMIT, DMA_access);
+	return 0;
+}
+
+int kvm_set_dma_access(int cmd, uint32_t addr, int len)
+{
+	static struct DMA_AC DMA_access;
+
+	switch (cmd) {
+		case SET_DMA_BEGIN:
+			DMA_access.size = 0;
+			break;
+		case SET_DMA_DATA:
+			while (len > 0) {
+				DMA_access.gfn[DMA_access.size] = addr >> PAGE_SHIFT;
+				//printf("%s, gfn=0x%x\n", __func__, addr >> PAGE_SHIFT);
+				addr += PAGE_SIZE;
+				len -= PAGE_SIZE;
+				DMA_access.size ++;
+				if (DMA_access.size == DMA_AC_SIZE) {
+					kvm_commit_dma_access(&DMA_access);
+					DMA_access.size = 0;
+				}
+			}
+			break;
+		case SET_DMA_END:
+			if (DMA_access.size != 0)
+				kvm_commit_dma_access(&DMA_access);
+			DMA_access.size = 0;
+			break;
+		default:
+			printf("%s, cmd error, %d\n", __func__, cmd);
+	}
+	return 0;
+}
+
 int kvm_has_sync_mmu(void)
 {
     return kvm_check_extension(kvm_state, KVM_CAP_SYNC_MMU);

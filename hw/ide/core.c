@@ -623,11 +623,17 @@ void ide_dma_cb(void *opaque, int ret)
     n = s->nsector;
     s->io_buffer_index = 0;
     s->io_buffer_size = n * 512;
+	// XELATEX
+	kvm_set_dma_access(SET_DMA_BEGIN, 0, 0);
     if (s->bus->dma->ops->prepare_buf(s->bus->dma, ide_cmd_is_read(s)) == 0) {
         /* The PRDs were too short. Reset the Active bit, but don't raise an
          * interrupt. */
+        // XELATEX
+        kvm_set_dma_access(SET_DMA_END, 0, 0);
         goto eot;
     }
+	// XELATEX
+	kvm_set_dma_access(SET_DMA_END, 0, 0);
 
 #ifdef DEBUG_AIO
     printf("ide_dma_cb: sector_num=%" PRId64 " n=%d, cmd_cmd=%d\n",

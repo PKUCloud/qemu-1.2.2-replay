@@ -72,6 +72,8 @@ static int bmdma_prepare_buf(IDEDMA *dma, int is_write)
                 (bm->cur_addr - bm->addr) >= BMDMA_PAGE_SIZE)
                 return s->io_buffer_size != 0;
             pci_dma_read(&bm->pci_dev->dev, bm->cur_addr, &prd, 8);
+			//if (bm->cur_addr >> 12 != 0x195da && bm->cur_addr >> 12 != 0x195db)
+			//	printf("%s, addr=0x%lx\n", __func__, bm->cur_addr);
             bm->cur_addr += 8;
             prd.addr = le32_to_cpu(prd.addr);
             prd.size = le32_to_cpu(prd.size);
@@ -85,6 +87,8 @@ static int bmdma_prepare_buf(IDEDMA *dma, int is_write)
         l = bm->cur_prd_len;
         if (l > 0) {
             qemu_sglist_add(&s->sg, bm->cur_prd_addr, l);
+			// XELATEX
+			kvm_set_dma_access(SET_DMA_DATA, bm->cur_prd_addr, l);
             bm->cur_prd_addr += l;
             bm->cur_prd_len -= l;
             s->io_buffer_size += l;
