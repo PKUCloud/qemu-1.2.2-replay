@@ -351,6 +351,7 @@ struct kvm_dirty_log {
 // XELATEX
 #define DMA_AC_SIZE 32
 struct DMA_AC {
+	int cmd;
 	int size;
 	__u32 gfn[DMA_AC_SIZE];
 };

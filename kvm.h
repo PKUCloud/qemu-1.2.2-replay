@@ -112,6 +112,8 @@ int kvm_init(void);
 #define SET_DMA_BEGIN 0
 #define SET_DMA_DATA  1
 #define SET_DMA_END   2
+#define DMA_START     3
+#define DMA_FINISHED  4
 int kvm_set_dma_access(int cmd, uint32_t addr, int len);
 
 int kvm_has_sync_mmu(void);

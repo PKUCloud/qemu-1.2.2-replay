@@ -616,6 +616,8 @@ void ide_dma_cb(void *opaque, int ret)
     if (s->nsector == 0) {
         s->status = READY_STAT | SEEK_STAT;
         ide_set_irq(s->bus);
+		// XELATEX
+		kvm_set_dma_access(DMA_FINISHED, 0, 0);
         goto eot;
     }
 
@@ -624,6 +626,7 @@ void ide_dma_cb(void *opaque, int ret)
     s->io_buffer_index = 0;
     s->io_buffer_size = n * 512;
 	// XELATEX
+	kvm_set_dma_access(DMA_START, 0, 0);
 	kvm_set_dma_access(SET_DMA_BEGIN, 0, 0);
     if (s->bus->dma->ops->prepare_buf(s->bus->dma, ide_cmd_is_read(s)) == 0) {
         /* The PRDs were too short. Reset the Active bit, but don't raise an
